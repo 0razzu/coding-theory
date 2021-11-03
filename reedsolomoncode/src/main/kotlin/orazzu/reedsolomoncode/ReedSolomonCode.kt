@@ -66,17 +66,26 @@ class ReedSolomonCode(val codeLen: Int, val errorQuan: Int) {
                 }
             }
 
-//            ght.forEach { str ->
-//                str.forEach { num ->
-//                    print(num.value)
-//                    print('\t')
-//                }
-//                println()
-//            }
-//            println()
-
             for (j in infoLen until codeLen)
                 g[i][j] = ght[j - infoLen][2 * errorQuan]
         }
+    }
+
+
+    fun encode(message: Array<GFNumber>): Array<GFNumber> {
+        if (message.size != infoLen)
+            throw IllegalArgumentException("Wrong info length")
+
+        for (num in message)
+            if (num.order != codeLen + 1)
+                throw IllegalArgumentException("Wrong order of number")
+
+        val encoded = Array<GFNumber>(codeLen) { GFNumber(0, codeLen + 1) }
+
+        for (i in 0 until codeLen)
+            for (j in 0 until infoLen)
+                encoded[i] += message[j] * g[j][i]
+
+        return encoded
     }
 }
