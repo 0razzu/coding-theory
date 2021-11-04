@@ -47,7 +47,7 @@ class ReedSolomonCode(val codeLen: Int, val errorQuan: Int) {
                     if (underDiag.value != 0) {
                         ght[u][k] = GFNumber(0, codeLen + 1)
 
-                        for (j in u until codeLen - infoLen + 1)
+                        for (j in k + 1 until codeLen - infoLen + 1)
                             ght[u][j] -= ght[k][j] * underDiag
                     }
                 }
