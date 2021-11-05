@@ -6,7 +6,7 @@ class GFNumber(value: Int, val order: Int) {
 
 
     private fun checkOrders(other: GFNumber) {
-        if (order != this.order)
+        if (order != other.order)
             throw IllegalArgumentException("Orders must be equal")
     }
 
@@ -51,7 +51,28 @@ class GFNumber(value: Int, val order: Int) {
     }
 
 
+    operator fun inc(): GFNumber {
+        return GFNumber(value + 1, order)
+    }
+
+
     override fun toString(): String {
         return "$value($order)"
+    }
+
+
+    override fun equals(other: Any?): Boolean {
+        if (other!!::class == GFNumber::class) {
+            val otherGFNumber = other as GFNumber
+
+            return value == otherGFNumber.value && order == otherGFNumber.order
+        }
+
+        return false
+    }
+
+
+    override fun hashCode(): Int {
+        return arrayOf(value, order).contentHashCode()
     }
 }
