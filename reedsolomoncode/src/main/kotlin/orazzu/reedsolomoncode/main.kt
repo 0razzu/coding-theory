@@ -12,14 +12,14 @@ fun messageToFourWords(message: String): List<Array<GFNumber>> {
         byteThirds.add((byteInt and 0b00011100) shr 2)
         byteThirds.add(byteInt and 0b00000011)
     }
-    val gf11Numbers = byteThirds.map { GFNumber(it, 11) }.toMutableList()
 
     var extraZeros = 0
-    while (gf11Numbers.size % 4 != 0) {
-        gf11Numbers.add(GFNumber(0, 11))
+    while (byteThirds.size % 4 != 0) {
+        byteThirds.add(0)
         extraZeros++
     }
 
+    val gf11Numbers = byteThirds.map { GFNumber(it, 11) }
     val fourWords = mutableListOf<Array<GFNumber>>()
     for (i in gf11Numbers.indices step 4)
         fourWords.add(
@@ -49,20 +49,44 @@ fun fourWordsToMessage(fourWords: List<Array<GFNumber>>): String {
     val byteThirds = gf11Numbers.map { it.value }
     val bytes = mutableListOf<Byte>()
     for (i in byteThirds.indices step 3)
-        bytes.add(
-            (
-                    (byteThirds[i] shl 5) + (byteThirds[i + 1] shl 2) + byteThirds[i + 2]
-                    ).toUByte().toByte()
-        )
+        bytes.add(((byteThirds[i] shl 5) + (byteThirds[i + 1] shl 2) + byteThirds[i + 2]).toByte())
     val byteArray = ByteArray(bytes.size) { i -> bytes[i] }
 
     return String(byteArray, Charsets.UTF_8)
 }
 
 
+fun printGFMatrix(matrix: Array<Array<GFNumber>>) {
+    matrix.forEach { str ->
+        str.forEach { num ->
+            print(num.value)
+            print('\t')
+        }
+        println()
+    }
+    println()
+}
+
+
+fun printWordList(wordList: List<Array<GFNumber>>) {
+    wordList.forEach { word -> println(word.map { num -> num.value }.toList()) }
+    println()
+}
+
+
 fun main() {
     val rsc = ReedSolomonCode(10, 3)
-    val message = "Ab яё 大家好 1?"
+
+    println("H")
+    printGFMatrix(rsc.h)
+
+    println("G")
+    printGFMatrix(rsc.g)
+
+    println("Enter your message")
+    val message = readLine()!!
+    println()
+
     val fourWords = messageToFourWords(message)
     val encoded = fourWords.map { rsc.encode(it) }
     val noised = encoded.map { word ->
@@ -74,43 +98,18 @@ fun main() {
     val decoded = noised.map { rsc.decode(it) }
     val decodedMessage = fourWordsToMessage(decoded)
 
-    println("H")
-    rsc.h.forEach { str ->
-        str.forEach { num ->
-            print(num.value)
-            print('\t')
-        }
-        println()
-    }
-    println()
+    println("4-words")
+    printWordList(fourWords)
 
-    println("G")
-    rsc.g.forEach { str ->
-        str.forEach { num ->
-            print(num.value)
-            print('\t')
-        }
-        println()
-    }
-    println()
+    println("Encoded words")
+    printWordList(encoded)
 
-    println("fourWords")
-    fourWords.forEach { println(it.toList()) }
-    println()
+    println("Noised words")
+    printWordList(noised)
 
-    println("encoded")
-    encoded.forEach { println(it.toList()) }
-    println()
+    println("Decoded words")
+    printWordList(decoded)
 
-    println("noised")
-    noised.forEach { println(it.toList()) }
-    println()
-
-    println("decoded")
-    decoded.forEach { println(it.toList()) }
-    println()
-
-    println("decoded message")
+    println("Decoded message")
     println(decodedMessage)
-    println()
 }
